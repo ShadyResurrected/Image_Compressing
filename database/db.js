@@ -15,6 +15,7 @@ const Connection = () => {
       db.run(`CREATE TABLE IF NOT EXISTS images (
         id INTEGER PRIMARY KEY,
         ip TEXT,
+        fileName TEXT,
         timestamp TIMESTAMP,
         status TEXT,
         download_link TEXT

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 // importing the database
 import sqlite3 from "sqlite3";
-const db = new sqlite3.Database('./image.db');
+const db = new sqlite3.Database("./image.db");
 
 export const uploadImage = (req, res) => {
   console.log(req.file);
@@ -15,21 +15,27 @@ export const compressImage = (req, res) => {
   const fileType = req.file.mimetype.split("/")[1];
   const compressionLevel = parseInt(req.body.compressionLevel);
   let output;
+  const fileName = Date.now() + "-" + req.file.originalname;
   // Asynchronously compress the image
-  if (fileType === "jpeg") {
+  if (fileType === "jpeg" || fileType == "png") {
     output = sharp(req.file.path)
       .jpeg({ quality: compressionLevel, progressive: true })
-      .toFile(`compressed/${req.file.originalname}`)
+      .toFile(`compressed/${fileName}`)
       .then((data) => {
         const compressedSize = data.size;
         const originalSize = req.file.size;
         const comPercent = (compressedSize / originalSize) * 100;
+
+        // Generating the date when the image was compressed
+        let obj = new Date();
+        let time = obj.toGMTString();
+
         // Generate a unique download link
         const downloadLink = uuidv4();
         // Create a new record in the database
         const sql =
-          "INSERT INTO images (id,ip, timestamp, status, download_link) VALUES (NULL,?, ?, ?, ?)"; // Insert NULL to autoincrement id
-        const values = [ req.ip, new Date(), "success", downloadLink];
+          "INSERT INTO images (id,ip, fileName,timestamp, status, download_link) VALUES (NULL,?, ?,?, ?, ?)"; // Insert NULL to autoincrement id
+        const values = [req.ip, fileName, time, "success", downloadLink];
         db.run(sql, values, (err) => {
           if (err) {
             res.status(500).json({ status: "failed", message: err.message });
@@ -47,4 +53,21 @@ export const compressImage = (req, res) => {
         res.status(500).json(err.message);
       });
   }
+};
+
+export const downloadImage = (req, res) => {
+  // Check if the image has been requested within the last 6 hours
+  const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+  db.get(
+    "SELECT * FROM images WHERE download_link = ? AND timestamp > ?",
+    [req.params.link, sixHoursAgo],
+    (err, image) => {
+      if (err || !image) {
+        res.status(404).send("Not found");
+      } else {
+        // Send the compressed image as a download
+        res.download(`compressed/${image.fileName}`);
+      }
+    }
+  );
 };
