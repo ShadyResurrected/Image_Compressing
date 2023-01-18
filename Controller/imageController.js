@@ -28,23 +28,43 @@ export const compressImage = (req, res) => {
 
         // Generating the date when the image was compressed
         let obj = new Date();
-        let time = obj.toGMTString();
+        let time = obj.toISOString();
+
+        // Get the IP address of the client
+        const ip = req.ip;
 
         // Generate a unique download link
         const downloadLink = uuidv4();
-        // Create a new record in the database
+        // Check if the IP address has exceeded the limit of 10 images per hour
         const sql =
-          "INSERT INTO images (id,ip, fileName,timestamp, status, download_link) VALUES (NULL,?, ?,?, ?, ?)"; // Insert NULL to autoincrement id
-        const values = [req.ip, fileName, time, "success", downloadLink];
-        db.run(sql, values, (err) => {
+          "SELECT COUNT(*) as count FROM images WHERE ip = ? AND timestamp >= ?";
+        const oneHourAgo = new Date(time - 60 * 60 * 1000);
+        db.get(sql, [ip, oneHourAgo], (err, row) => {
           if (err) {
             res.status(500).json({ status: "failed", message: err.message });
           } else {
-            res.json({
-              status: "success",
-              downloadLink: downloadLink,
-              compressionPercent: comPercent,
-            });
+            if (row.count >= 10) {
+              res.status(429).json({
+                status: "failed",
+                message: "Too many requests, please try again later",
+              });
+            } else {
+              // Create a new record in the database
+              const sql =
+                "INSERT INTO images (id,ip, fileName,timestamp, status, download_link) VALUES (NULL,?, ?,?, ?, ?)"; // Insert NULL to autoincrement id
+              const values = [req.ip, fileName, time, "success", downloadLink];
+              db.run(sql, values, (err) => {
+                if (err) {
+                  res.status(500).json({ status: "failed" });
+                } else {
+                  res.json({
+                    status: "success",
+                    downloadLink: downloadLink,
+                    compressionPercent: comPercent,
+                  });
+                }
+              });
+            }
           }
         });
       })
