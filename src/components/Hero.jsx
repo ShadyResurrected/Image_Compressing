@@ -101,7 +101,7 @@ const Hero = () => {
           <Form.Control
             required
             type="text"
-            placeholder="Enter the compression level"
+            placeholder="Enter the value between 1 and 100"
             onChange={(e) => setCompressionLevel(e.target.value)}
             style={{ width: "20rem" }}
           />
