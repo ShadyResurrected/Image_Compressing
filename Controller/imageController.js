@@ -17,6 +17,7 @@ export const compressImage = (req, res) => {
   let output;
   const fileName = Date.now() + "-" + req.file.originalname;
   // Asynchronously compress the image
+  // the image format allowed is only jpeg and png
   if (fileType === "jpeg" || fileType == "png") {
     output = sharp(req.file.path)
       .jpeg({ quality: compressionLevel, progressive: true })
@@ -36,6 +37,7 @@ export const compressImage = (req, res) => {
 
         // Generate a unique download link
         const downloadLink = uuidv4();
+
         // Check if the IP address has exceeded the limit of 10 images per hour
         const sql =
           "SELECT COUNT(*) as count FROM images WHERE ip = ? AND timestamp >= ?";
