@@ -138,6 +138,8 @@ const Hero = () => {
             Download Link : {downloadLink === "" ? "none" : downloadLink}
             <br />
             Message : {message === "" ? "none" : message}
+            <br />
+            
           </Card.Text>
         </Card.Body>
       </Card>

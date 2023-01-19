@@ -1,3 +1,7 @@
 .seperate_boxes{
     display: flex;
 }
+.postman-run-button{
+    position: absolute;
+    left: 8rem;
+}
