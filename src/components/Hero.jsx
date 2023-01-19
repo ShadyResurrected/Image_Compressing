@@ -5,6 +5,8 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
 
+import {AiFillGithub} from 'react-icons/ai'
+
 import "../index.css";
 
 const Hero = () => {
@@ -139,7 +141,7 @@ const Hero = () => {
             <br />
             Message : {message === "" ? "none" : message}
             <br />
-            
+            <AiFillGithub className="github_icon" onClick={() => {window.location.href = 'https://github.com/ShadyResurrected/Image_Compressing'}} target="_blank"/>
           </Card.Text>
         </Card.Body>
       </Card>

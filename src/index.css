@@ -5,3 +5,10 @@
     position: absolute;
     left: 8rem;
 }
+.github_icon{
+    font-size: 3rem;
+    position: relative;
+    right: 13rem;
+    top: 6.2rem;
+    cursor: pointer;
+}
