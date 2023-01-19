@@ -5,11 +5,6 @@ import { v4 as uuidv4 } from "uuid";
 import sqlite3 from "sqlite3";
 const db = new sqlite3.Database("./image.db");
 
-export const uploadImage = (req, res) => {
-  console.log(req.file);
-  res.json({ message: "Successfully uploaded files" });
-};
-
 export const compressImage = (req, res) => {
   // Get the file type and compression level from the request
   const fileType = req.file.mimetype.split("/")[1];
