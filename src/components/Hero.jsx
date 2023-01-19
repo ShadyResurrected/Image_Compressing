@@ -3,10 +3,15 @@ import axios from "axios";
 
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import Card from "react-bootstrap/Card";
+
+import "../index.css";
 
 const Hero = () => {
   const [image, setImage] = useState(null);
+  const [downloadLinkUser, setDownloadLinkUser] = useState("")
   const [downloadLink, setDownloadLink] = useState("");
+  
   const [compressionLevel, setCompressionLevel] = useState(0);
   const [compressionPercent, setCompressionPercent] = useState("");
   const [status, setStatus] = useState("");
@@ -73,21 +78,53 @@ const Hero = () => {
           Image format must be png or jpg
         </Form.Text>
       </Form.Group>
-      <Form.Group className="mb-3">
-        <Form.Label>Compression Level</Form.Label>
-        <Form.Control
-          required
-          type="text"
-          placeholder="Enter the compression level"
-          onChange={(e) => setCompressionLevel(e.target.value)}
-        />
-      </Form.Group>
-      <Button variant="primary" className="me-2" onClick={CompressImage}>
-        Compress Image
-      </Button>
-      <Button variant="primary" onClick={DownloadImage}>
-        Download Image
-      </Button>
+
+      <div className="seperate_boxes">
+        <Form.Group className="mb-3 me-3">
+          <Form.Label>Compression Level</Form.Label>
+          <Form.Control
+            required
+            type="text"
+            placeholder="Enter the compression level"
+            onChange={(e) => setCompressionLevel(e.target.value)}
+            style ={{width : '20rem'}}
+          />
+          <Button variant="primary" className="mt-2" onClick={CompressImage}>
+            Compress Image
+          </Button>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Download Image</Form.Label>
+          <Form.Control
+            required
+            type="text"
+            placeholder="Enter the download link"
+            onChange={(e) => setDownloadLinkUser(e.target.value)}
+            style ={{width : '20rem'}}
+          />
+          <Button variant="primary" onClick={DownloadImage} className="mt-2">
+            Download Image
+          </Button>
+        </Form.Group>
+      </div>
+
+      <Card
+        style={{ width: "50%", marginTop: "2rem", height: "10rem" }}
+        className="container"
+      >
+        <Card.Body>
+          <Card.Title className="text-center">Details</Card.Title>
+          <Card.Text className="mt-3">
+            Compression Percent :{" "}
+            {compressionPercent === "" ? "none" : compressionPercent}
+            <br />
+            Status : {status === "" ? "none" : status}
+            <br />
+            Download Link : {downloadLink === "" ? "none" : downloadLink}
+          </Card.Text>
+        </Card.Body>
+      </Card>
     </Form>
   );
 };
