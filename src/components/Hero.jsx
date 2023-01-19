@@ -9,15 +9,20 @@ import "../index.css";
 
 const Hero = () => {
   const [image, setImage] = useState(null);
-  const [downloadLinkUser, setDownloadLinkUser] = useState("")
+
+  const [downloadLinkUser, setDownloadLinkUser] = useState("");
   const [downloadLink, setDownloadLink] = useState("");
-  
+
   const [compressionLevel, setCompressionLevel] = useState(0);
   const [compressionPercent, setCompressionPercent] = useState("");
+
+  const [message, setMessage] = useState("");
+
   const [status, setStatus] = useState("");
 
-  const comURL = "http://localhost:3000/compress";
-  const downURL = `http://localhost:3000/download/${downloadLink}`;
+  const comURL = `${import.meta.env.VITE_BASE_URL}/compress`;
+
+  const downURL = `${import.meta.env.VITE_BASE_URL}/download/${downloadLinkUser}`;
 
   const handleImage = (e) => {
     setImage(e.target.files[0]);
@@ -40,8 +45,13 @@ const Hero = () => {
         setCompressionPercent(response.data.compressionPercent);
         setStatus(response.data.status);
         setDownloadLink(response.data.downloadLink);
+        setMessage("Image compressed successfully");
       }
     } catch (error) {
+      setStatus(error.response.data.status);
+      setMessage(error.response.data.message);
+      setCompressionPercent("");
+      setDownloadLink("");
       console.log(error);
     }
   };
@@ -65,11 +75,15 @@ const Hero = () => {
         link.click();
       }
     } catch (error) {
+      setStatus(error.response.data.status);
+      setMessage(error.response.data.message);
+      setCompressionPercent("");
+      setDownloadLink("");
       console.log(error);
     }
   };
   return (
-    <Form className="container outer_div">
+    <Form className="container outer_div my-4">
       <h1 className="text-center">Image Compression</h1>
       <Form.Group className="mb-3" controlId="image">
         <Form.Label>Upload images here</Form.Label>
@@ -87,7 +101,7 @@ const Hero = () => {
             type="text"
             placeholder="Enter the compression level"
             onChange={(e) => setCompressionLevel(e.target.value)}
-            style ={{width : '20rem'}}
+            style={{ width: "20rem" }}
           />
           <Button variant="primary" className="mt-2" onClick={CompressImage}>
             Compress Image
@@ -101,7 +115,7 @@ const Hero = () => {
             type="text"
             placeholder="Enter the download link"
             onChange={(e) => setDownloadLinkUser(e.target.value)}
-            style ={{width : '20rem'}}
+            style={{ width: "20rem" }}
           />
           <Button variant="primary" onClick={DownloadImage} className="mt-2">
             Download Image
@@ -110,7 +124,7 @@ const Hero = () => {
       </div>
 
       <Card
-        style={{ width: "50%", marginTop: "2rem", height: "10rem" }}
+        style={{ width: "50%", marginTop: "2rem", height: "15rem" }}
         className="container"
       >
         <Card.Body>
@@ -122,6 +136,8 @@ const Hero = () => {
             Status : {status === "" ? "none" : status}
             <br />
             Download Link : {downloadLink === "" ? "none" : downloadLink}
+            <br />
+            Message : {message === "" ? "none" : message}
           </Card.Text>
         </Card.Body>
       </Card>
