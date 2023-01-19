@@ -29,6 +29,7 @@ export const compressImage = (req, res) => {
         // Generating the date when the image was compressed
         let obj = new Date();
         let time = obj.toISOString();
+        const timestamp = new Date();
 
         // Get the IP address of the client
         const ip = req.ip;
@@ -38,7 +39,7 @@ export const compressImage = (req, res) => {
         // Check if the IP address has exceeded the limit of 10 images per hour
         const sql =
           "SELECT COUNT(*) as count FROM images WHERE ip = ? AND timestamp >= ?";
-        const oneHourAgo = new Date(time - 60 * 60 * 1000);
+          const oneHourAgo = new Date(timestamp.getTime() - (60*60*1000));
         db.get(sql, [ip, oneHourAgo], (err, row) => {
           if (err) {
             res.status(500).json({ status: "failed", message: err.message });
@@ -61,6 +62,7 @@ export const compressImage = (req, res) => {
                     status: "success",
                     downloadLink: downloadLink,
                     compressionPercent: comPercent,
+                    imageName : fileName
                   });
                 }
               });
@@ -76,18 +78,30 @@ export const compressImage = (req, res) => {
 };
 
 export const downloadImage = (req, res) => {
-  // Check if the image has been requested within the last 6 hours
-  const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
-  db.get(
-    "SELECT * FROM images WHERE download_link = ? AND timestamp > ?",
-    [req.params.link, sixHoursAgo],
-    (err, image) => {
-      if (err || !image) {
-        res.status(404).send("Not found");
+  // Get the download link from the request
+  const downloadLink = req.params.link;
+
+  // Get the current timestamp
+  const currentTimestamp = new Date();
+
+  // Get the image data from the database
+  const sql = "SELECT * FROM images WHERE download_link = ?";
+  db.get(sql, [downloadLink], (err, row) => {
+    if (err) {
+      res.status(500).json({ status: "failed", message: err.message });
+    } else {
+      if (!row) {
+        res.status(404).json({ status: "failed", message: "Link not found" });
       } else {
-        // Send the compressed image as a download
-        res.download(`compressed/${image.fileName}`);
+        // Check if the image is still available for download
+        const sixHours = 6 * 60 * 60 * 1000;
+        if (currentTimestamp - new Date(row.timestamp) > sixHours) {
+          res.status(410).json({ status: "failed", message: "Link expired" });
+        } else {
+          // Serve the image file
+          res.download(`compressed/${row.fileName}`);
+        }
       }
     }
-  );
+  });
 };
